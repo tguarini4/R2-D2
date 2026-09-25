@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R2-D2 Control Console</title>
+
+    <!-- Star Wars font -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at top, #111 0%, #000 70%);
+            color: #ffe81f;
+            font-family: "Orbitron", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        .panel {
+            position: relative;
+            z-index: 1;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ffe81f;
+            border-radius: 12px;
+            padding: 30px 40px;
+            box-shadow: 0 0 25px #ffe81f55;
+            text-align: center;
+            max-width: 480px;
+            width: 100%;
+        }
+
+        h1 {
+            margin-top: 0;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #ffe81f;
+        }
+
+        .subtitle {
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            color: #ccc;
+        }
+
+        .section-title {
+            font-size: 0.85em;
+            color: #9fdcff;
+            margin: 20px 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .dome-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 15px 0;
+        }
+
+        .key {
+            border: 2px solid #ffe81f;
+            border-radius: 8px;
+            padding: 10px 0;
+            box-shadow: inset 0 0 12px #ffe81f33;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s;
+        }
+
+        .key:active,
+        .key.active {
+            background: #ffe81f33;
+            box-shadow: inset 0 0 20px #ffe81f66;
+            transform: scale(0.95);
+        }
+
+        .key span {
+            display: block;
+            font-size: 1.6em;
+        }
+
+        .key.dome {
+            background: rgba(77, 213, 255, 0.1);
+            border-color: #4bd5ff;
+        }
+
+        .key.dome:active,
+        .key.dome.active {
+            background: #4bd5ff33;
+            box-shadow: inset 0 0 20px #4bd5ff66;
+        }
+
+        .slider-container {
+            margin-top: 20px;
+        }
+
+        input[type="range"] {
+            width: 80%;
+            height: 6px;
+            border-radius: 5px;
+            background: #333;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffe81f;
+            cursor: pointer;
+            box-shadow: 0 0 10px #ffe81f;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffe81f;
+            cursor: pointer;
+            box-shadow: 0 0 10px #ffe81f;
+            border: none;
+        }
+
+        .status {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #9fdcff;
+            min-height: 1.2em;
+        }
+
+        .connection-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4bd5ff;
+            box-shadow: 0 0 10px #4bd5ff;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
+        }
+
+        .connection-indicator.offline {
+            background: #ff4444;
+            box-shadow: 0 0 10px #ff4444;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .lightsaber {
+            height: 4px;
+            width: 100%;
+            margin-top: 18px;
+            background: linear-gradient(90deg, transparent, #4bd5ff, #fff, #4bd5ff, transparent);
+            box-shadow: 0 0 15px #4bd5ff;
+        }
+
+        .mode-toggle {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border: 2px solid #ffe81f55;
+            background: transparent;
+            color: #ffe81f;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .mode-btn:hover {
+            border-color: #ffe81f;
+            box-shadow: 0 0 10px #ffe81f55;
+        }
+
+        .mode-btn.active {
+            background: #ffe81f33;
+            border-color: #ffe81f;
+        }
+
+        .emergency-stop {
+            margin-top: 15px;
+            padding: 12px 24px;
+            background: #ff4444;
+            border: 2px solid #ff6666;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1em;
+            box-shadow: 0 0 15px #ff444455;
+            transition: all 0.2s;
+        }
+
+        .emergency-stop:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 25px #ff4444;
+        }
+
+        @media (max-width: 480px) {
+            .panel {
+                padding: 20px;
+            }
+            .controls, .dome-controls {
+                gap: 8px;
+            }
+            .key {
+                padding: 8px 0;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+
+<body tabindex="0">
+    <div class="panel">
+        <h1>R2-D2</h1>
+        <div class="subtitle">Remote Droid Control Interface</div>
+
+        <div class="mode-toggle">
+            <button class="mode-btn active" data-mode="standard">Standard</button>
+            <button class="mode-btn" data-mode="pivot">Pivot Turn</button>
+        </div>
+
+        <div class="section-title">⚙ Drive Controls</div>
+        <div class="controls">
+            <div></div>
+            <div class="key" data-direction="forward"><span>⬆</span>Forward</div>
+            <div></div>
+
+            <div class="key" data-direction="left"><span>⬅</span>Left</div>
+            <div class="key" data-direction="backward"><span>⬇</span>Back</div>
+            <div class="key" data-direction="right"><span>➡</span>Right</div>
+        </div>
+
+        <div class="section-title">🔵 Dome Controls</div>
+        <div class="dome-controls">
+            <div class="key dome" data-dome="left"><span>↶</span>Rotate Left<br><small>(Q)</small></div>
+            <div class="key dome" data-dome="right"><span>↷</span>Rotate Right<br><small>(E)</small></div>
+        </div>
+
+        <div class="section-title">🦿 2-3-2 Leg Transition</div>
+        <div class="dome-controls">
+            <div class="key dome" data-legs="extend"><span>⬈</span>Extend (2→3)<br><small>(R)</small></div>
+            <div class="key dome" data-legs="retract"><span>⬋</span>Retract (3→2)<br><small>(F)</small></div>
+        </div>
+
+        <div class="section-title">⚓ Center Foot (Lead Screw)</div>
+        <div class="dome-controls">
+            <div class="key dome" data-screw="up"><span>⬆</span>Foot Up<br><small>(T)</small></div>
+            <div class="key dome" data-screw="down"><span>⬇</span>Foot Down<br><small>(G)</small></div>
+        </div>
+
+        <div class="slider-container">
+            <label>Drive Speed: <span id="speedValue">25</span>%</label><br>
+            <input type="range" id="speed" min="0" max="100" value="25">
+        </div>
+
+        <div class="slider-container">
+            <label>Dome Speed: <span id="domeSpeedValue">30</span>%</label><br>
+            <input type="range" id="domeSpeed" min="0" max="100" value="30">
+        </div>
+
+        <div class="slider-container">
+            <label>🔊 Volume: <span id="volumeValue">80</span>%</label><br>
+            <input type="range" id="volume" min="0" max="100" value="80">
+        </div>
+
+        <button class="emergency-stop" id="emergencyStop">⚠ EMERGENCY STOP ⚠</button>
+
+        <div class="status">
+            <span class="connection-indicator" id="indicator"></span>
+            <span id="statusText">Initializing...</span>
+        </div>
+
+        <div class="lightsaber"></div>
+    </div>
+
+<script>
+/* ---------- CONFIGURATION ---------- */
+const API_URL = window.location.origin;
+let connectionStatus = 'checking';
+let turnMode = 'standard';
+
+/* ---------- AUDIO NOTE ---------- */
+// Audio now plays on the Raspberry Pi through USB speaker
+// No browser audio needed!
+
+/* ---------- STATUS & CONNECTION ---------- */
+const indicator = document.getElementById("indicator");
+const statusText = document.getElementById("statusText");
+
+function updateStatus(message, isError = false) {
+    statusText.innerText = message;
+    if (isError) {
+        indicator.classList.add("offline");
+        connectionStatus = 'offline';
+    } else {
+        indicator.classList.remove("offline");
+        connectionStatus = 'online';
+    }
+}
+
+async function checkConnection() {
+    try {
+        const response = await fetch(`${API_URL}/status`);
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Update volume slider from server
+            if (data.state && data.state.volume !== undefined) {
+                const volumeSlider = document.getElementById("volume");
+                const volumeValue = document.getElementById("volumeValue");
+                volumeSlider.value = data.state.volume;
+                volumeValue.innerText = data.state.volume;
+            }
+            
+            updateStatus("R2-D2 ready");
+            return true;
+        }
+    } catch (e) {
+        updateStatus("Connection lost", true);
+        return false;
+    }
+}
+
+/* ---------- SPEED CONTROLS ---------- */
+let currentSpeed = 25;
+let domeSpeed = 30;
+let currentVolume = 80;
+let currentDirection = "stop";
+let currentDomeDirection = "stop";
+
+const slider = document.getElementById("speed");
+const speedValue = document.getElementById("speedValue");
+const domeSlider = document.getElementById("domeSpeed");
+const domeSpeedValue = document.getElementById("domeSpeedValue");
+const volumeSlider = document.getElementById("volume");
+const volumeValue = document.getElementById("volumeValue");
+
+slider.addEventListener("input", () => {
+    currentSpeed = parseInt(slider.value);
+    speedValue.innerText = currentSpeed;
+});
+
+domeSlider.addEventListener("input", () => {
+    domeSpeed = parseInt(domeSlider.value);
+    domeSpeedValue.innerText = domeSpeed;
+});
+
+volumeSlider.addEventListener("input", async () => {
+    currentVolume = parseInt(volumeSlider.value);
+    volumeValue.innerText = currentVolume;
+    
+    // Send volume to server
+    try {
+        await fetch(`${API_URL}/volume`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ volume: currentVolume })
+        });
+    } catch (error) {
+        console.error("Volume update error:", error);
+    }
+});
+
+/* ---------- MODE TOGGLE ---------- */
+document.querySelectorAll(".mode-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        turnMode = btn.dataset.mode;
+        updateStatus(`Mode: ${turnMode === 'standard' ? 'Standard Turn' : 'Pivot Turn'}`);
+    });
+});
+
+/* ---------- DRIVE MOVE FUNCTION ---------- */
+async function move(direction) {
+    if (direction === currentDirection) return;
+    
+    let actualDirection = direction;
+    if (turnMode === 'pivot' && (direction === 'left' || direction === 'right')) {
+        actualDirection = `pivot_${direction}`;
+    }
+    
+    currentDirection = direction;
+
+    document.querySelectorAll(".key:not(.dome)").forEach(key => key.classList.remove("active"));
+    if (direction !== "stop") {
+        const activeKey = document.querySelector(`[data-direction="${direction}"]`);
+        if (activeKey) activeKey.classList.add("active");
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/move`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                direction: actualDirection,
+                speed: currentSpeed
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        if (connectionStatus !== 'online') {
+            updateStatus("R2-D2 ready");
+        }
+    } catch (error) {
+        console.error("Move error:", error);
+        updateStatus("Command failed", true);
+        currentDirection = "stop";
+    }
+}
+
+/* ---------- DOME MOVE FUNCTION ---------- */
+async function moveDome(direction) {
+    if (direction === currentDomeDirection) return;
+    currentDomeDirection = direction;
+
+    document.querySelectorAll(".key.dome").forEach(key => key.classList.remove("active"));
+    if (direction !== "stop") {
+        const activeKey = document.querySelector(`[data-dome="${direction}"]`);
+        if (activeKey) activeKey.classList.add("active");
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/dome`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                direction: direction,
+                speed: domeSpeed
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+    } catch (error) {
+        console.error("Dome error:", error);
+        updateStatus("Dome command failed", true);
+        currentDomeDirection = "stop";
+    }
+}
+
+/* ---------- 2-3-2 LEG ACTUATOR FUNCTIONS ---------- */
+// Hold-to-move - legs pivot for as long as you hold the
+// button/key, giving direct manual control over the rotation.
+let currentLegsDirection = "stop";
+
+async function moveLegs(direction) {
+    if (direction === currentLegsDirection) return;
+    currentLegsDirection = direction;
+
+    document.querySelectorAll("[data-legs]").forEach(key => key.classList.remove("active"));
+    if (direction !== "stop") {
+        const activeKey = document.querySelector(`[data-legs="${direction}"]`);
+        if (activeKey) activeKey.classList.add("active");
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/actuators`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ direction })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (direction === "extend") updateStatus("Legs extending (2→3)...");
+        else if (direction === "retract") updateStatus("Legs retracting (3→2)...");
+        else updateStatus("Legs stopped");
+    } catch (error) {
+        console.error("Legs error:", error);
+        updateStatus("Leg command failed", true);
+        currentLegsDirection = "stop";
+    }
+}
+
+document.querySelectorAll("[data-legs]").forEach(key => {
+    const direction = key.dataset.legs;
+    key.addEventListener("mousedown", () => moveLegs(direction));
+    key.addEventListener("mouseup", () => moveLegs("stop"));
+    key.addEventListener("mouseleave", () => moveLegs("stop"));
+    key.addEventListener("touchstart", (e) => { e.preventDefault(); moveLegs(direction); });
+    key.addEventListener("touchend", (e) => { e.preventDefault(); moveLegs("stop"); });
+});
+
+/* ---------- CENTER FOOT LEAD SCREW FUNCTION ---------- */
+// Hold-to-move, same pattern as the dome controls.
+let currentScrewDirection = "stop";
+
+async function moveScrew(direction) {
+    if (direction === currentScrewDirection) return;
+    currentScrewDirection = direction;
+
+    document.querySelectorAll("[data-screw]").forEach(key => key.classList.remove("active"));
+    if (direction !== "stop") {
+        const activeKey = document.querySelector(`[data-screw="${direction}"]`);
+        if (activeKey) activeKey.classList.add("active");
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/screw`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ direction })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+        console.error("Screw error:", error);
+        updateStatus("Foot command failed", true);
+        currentScrewDirection = "stop";
+    }
+}
+
+document.querySelectorAll("[data-screw]").forEach(key => {
+    const direction = key.dataset.screw;
+    key.addEventListener("mousedown", () => moveScrew(direction));
+    key.addEventListener("mouseup", () => moveScrew("stop"));
+    key.addEventListener("mouseleave", () => moveScrew("stop"));
+    key.addEventListener("touchstart", (e) => { e.preventDefault(); moveScrew(direction); });
+    key.addEventListener("touchend", (e) => { e.preventDefault(); moveScrew("stop"); });
+});
+
+/* ---------- EMERGENCY STOP ---------- */
+document.getElementById("emergencyStop").addEventListener("click", async () => {
+    currentDirection = "stop";
+    currentDomeDirection = "stop";
+    currentLegsDirection = "stop";
+    currentScrewDirection = "stop";
+    
+    document.querySelectorAll(".key").forEach(key => key.classList.remove("active"));
+    
+    try {
+        await fetch(`${API_URL}/emergency_stop`, { method: "POST" });
+        updateStatus("⚠ EMERGENCY STOP ACTIVATED ⚠");
+        
+        setTimeout(() => {
+            updateStatus("R2-D2 ready");
+        }, 3000);
+    } catch (error) {
+        updateStatus("Emergency stop failed", true);
+    }
+});
+
+/* ---------- KEYBOARD CONTROL ---------- */
+const driveKeyMap = {
+    "ArrowUp": "forward",
+    "ArrowDown": "backward",
+    "ArrowLeft": "left",
+    "ArrowRight": "right",
+    "w": "forward",
+    "s": "backward",
+    "a": "left",
+    "d": "right"
+};
+
+const domeKeyMap = {
+    "q": "left",
+    "e": "right"
+};
+
+const legsKeyMap = {
+    "r": "extend",
+    "f": "retract"
+};
+
+const screwKeyMap = {
+    "t": "up",
+    "g": "down"
+};
+
+const activeDriveKeys = new Set();
+const activeDomeKeys = new Set();
+const activeLegsKeys = new Set();
+const activeScrewKeys = new Set();
+
+document.addEventListener("keydown", e => {
+    const driveDir = driveKeyMap[e.key];
+    const domeDir = domeKeyMap[e.key];
+    const legsDir = legsKeyMap[e.key];
+    const screwDir = screwKeyMap[e.key];
+    
+    if (driveDir && !activeDriveKeys.has(e.key)) {
+        activeDriveKeys.add(e.key);
+        move(driveDir);
+    }
+    
+    if (domeDir && !activeDomeKeys.has(e.key)) {
+        activeDomeKeys.add(e.key);
+        moveDome(domeDir);
+    }
+
+    if (legsDir && !activeLegsKeys.has(e.key)) {
+        activeLegsKeys.add(e.key);
+        moveLegs(legsDir);
+    }
+
+    if (screwDir && !activeScrewKeys.has(e.key)) {
+        activeScrewKeys.add(e.key);
+        moveScrew(screwDir);
+    }
+    
+    if (e.key === " ") {
+        e.preventDefault();
+        document.getElementById("emergencyStop").click();
+    }
+});
+
+document.addEventListener("keyup", e => {
+    const driveDir = driveKeyMap[e.key];
+    const domeDir = domeKeyMap[e.key];
+    const legsDir = legsKeyMap[e.key];
+    const screwDir = screwKeyMap[e.key];
+    
+    if (driveDir) {
+        activeDriveKeys.delete(e.key);
+        if (activeDriveKeys.size === 0) {
+            move("stop");
+        }
+    }
+    
+    if (domeDir) {
+        activeDomeKeys.delete(e.key);
+        if (activeDomeKeys.size === 0) {
+            moveDome("stop");
+        }
+    }
+
+    if (legsDir) {
+        activeLegsKeys.delete(e.key);
+        if (activeLegsKeys.size === 0) {
+            moveLegs("stop");
+        }
+    }
+
+    if (screwDir) {
+        activeScrewKeys.delete(e.key);
+        if (activeScrewKeys.size === 0) {
+            moveScrew("stop");
+        }
+    }
+});
+
+/* ---------- TOUCH CONTROLS ---------- */
+document.querySelectorAll(".key:not(.dome)").forEach(key => {
+    const direction = key.dataset.direction;
+    if (!direction) return;
+
+    key.addEventListener("mousedown", () => move(direction));
+    key.addEventListener("mouseup", () => move("stop"));
+    key.addEventListener("mouseleave", () => move("stop"));
+    
+    key.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        move(direction);
+    });
+    key.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        move("stop");
+    });
+});
+
+document.querySelectorAll(".key.dome").forEach(key => {
+    const direction = key.dataset.dome;
+    if (!direction) return;
+
+    key.addEventListener("mousedown", () => moveDome(direction));
+    key.addEventListener("mouseup", () => moveDome("stop"));
+    key.addEventListener("mouseleave", () => moveDome("stop"));
+    
+    key.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        moveDome(direction);
+    });
+    key.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        moveDome("stop");
+    });
+});
+
+/* ---------- GAMEPAD (Xbox controller via browser) ---------- */
+// Reads an Xbox controller connected to THIS device (laptop/phone/
+// tablet) using the browser's standard Gamepad API, and drives the
+// exact same move()/moveDome()/moveLegs()/moveScrew() functions the
+// on-screen buttons and keyboard already use.
+//
+// Standard browser gamepad mapping for Xbox controllers:
+//   axes[0] = left stick X      axes[1] = left stick Y
+//   axes[2] = right stick X     axes[3] = right stick Y
+//   buttons[1] = B (emergency stop)
+//   buttons[4] = LB (foot down)     buttons[5] = RB (foot up)
+//   buttons[6] = LT (retract legs)  buttons[7] = RT (extend legs)
+const GAMEPAD_DEADZONE = 0.2;
+let gamepadIndex = null;
+let gamepadBPrevPressed = false;
+
+window.addEventListener("gamepadconnected", (e) => {
+    gamepadIndex = e.gamepad.index;
+    updateStatus(`🎮 Controller connected: ${e.gamepad.id}`);
+});
+
+window.addEventListener("gamepaddisconnected", (e) => {
+    if (e.gamepad.index === gamepadIndex) {
+        gamepadIndex = null;
+        move("stop");
+        moveDome("stop");
+        moveLegs("stop");
+        moveScrew("stop");
+        updateStatus("🎮 Controller disconnected");
+    }
+});
+
+function applyDeadzone(value) {
+    return Math.abs(value) < GAMEPAD_DEADZONE ? 0 : value;
+}
+
+function gamepadLoop() {
+    if (gamepadIndex !== null) {
+        const gp = navigator.getGamepads()[gamepadIndex];
+        if (gp) {
+            // --- Drive (left stick) ---
+            const steerX = applyDeadzone(gp.axes[0]);
+            const throttleY = applyDeadzone(-gp.axes[1]); // up = positive
+
+            if (throttleY === 0 && steerX === 0) {
+                move("stop");
+            } else if (Math.abs(throttleY) >= Math.abs(steerX)) {
+                move(throttleY > 0 ? "forward" : "backward");
+            } else {
+                move(steerX > 0 ? "right" : "left");
+            }
+
+            // --- Dome (right stick X) ---
+            const domeX = applyDeadzone(gp.axes[2]);
+            if (domeX > 0) moveDome("right");
+            else if (domeX < 0) moveDome("left");
+            else moveDome("stop");
+
+            // --- Legs (RT = extend, LT = retract) ---
+            const rt = gp.buttons[7] ? gp.buttons[7].value : 0;
+            const lt = gp.buttons[6] ? gp.buttons[6].value : 0;
+            if (rt > 0.5) moveLegs("extend");
+            else if (lt > 0.5) moveLegs("retract");
+            else moveLegs("stop");
+
+            // --- Center foot (RB = up, LB = down) ---
+            const rb = gp.buttons[5] && gp.buttons[5].pressed;
+            const lb = gp.buttons[4] && gp.buttons[4].pressed;
+            if (rb) moveScrew("up");
+            else if (lb) moveScrew("down");
+            else moveScrew("stop");
+
+            // --- Emergency stop (B button, edge-triggered) ---
+            const bPressed = gp.buttons[1] && gp.buttons[1].pressed;
+            if (bPressed && !gamepadBPrevPressed) {
+                document.getElementById("emergencyStop").click();
+            }
+            gamepadBPrevPressed = bPressed;
+        }
+    }
+    requestAnimationFrame(gamepadLoop);
+}
+requestAnimationFrame(gamepadLoop);
+
+/* ---------- INITIALIZATION ---------- */
+window.onload = async () => {
+    document.body.focus();
+    
+    const connected = await checkConnection();
+    if (connected) {
+        updateStatus("R2-D2 ready");
+    }
+    
+    // Connection check interval
+    setInterval(checkConnection, 5000);
+};
+
+// Cleanup on page unload
+window.addEventListener("beforeunload", () => {
+    move("stop");
+    moveDome("stop");
+});
+</script>
+
+</body>
+</html>
