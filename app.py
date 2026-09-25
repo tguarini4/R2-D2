@@ -698,11 +698,11 @@ if __name__ == "__main__":
             oled_thread.start()
 
         initial_volume = get_current_volume()
-        print(f"🔊 Current volume: {initial_volume}%")
-        print(f"🌐 Pi IP address: {get_ip_address()}")
-        print("🤖 R2-D2 control system ready")
-        print("🤖 R2-D2 Motor Control Server starting on port 5000...")
-        print("📡 Access at: http://<your-pi-ip>:5000")
+        print(f"Current volume: {initial_volume}%")
+        print(f"Pi IP address: {get_ip_address()}")
+        print("R2-D2 control system ready")
+        print("R2-D2 Motor Control Server starting on port 5000...")
+        print("Access at: http://<your-pi-ip>:5000")
 
         app.run(host="0.0.0.0", port=5000, debug=False)
     except KeyboardInterrupt:
