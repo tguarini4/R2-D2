@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R2-D2 Wiring Diagram - All BTS7960</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #ccc;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .boards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .board {
+            background: linear-gradient(145deg, #2d2d2d, #1a1a1a);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .board h2 {
+            color: #4a90e2;
+            margin-top: 0;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 10px;
+        }
+
+        .board.dome h2 {
+            color: #50c878;
+            border-bottom-color: #50c878;
+        }
+
+        .connection {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 10px;
+            align-items: center;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            border-left: 3px solid #4a90e2;
+        }
+
+        .board.dome .connection {
+            border-left-color: #50c878;
+        }
+
+        .pin {
+            font-weight: bold;
+            padding: 8px 12px;
+            background: rgba(74, 144, 226, 0.2);
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .board.dome .pin {
+            background: rgba(80, 200, 120, 0.2);
+        }
+
+        .arrow {
+            font-size: 1.5em;
+            color: #ffd700;
+        }
+
+        .gpio-note {
+            background: rgba(255, 215, 0, 0.1);
+            border-left: 3px solid #ffd700;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .pinout {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            overflow-x: auto;
+        }
+
+        .pinout h3 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+
+        .pin-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .pin-cell {
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 0.9em;
+            border: 1px solid #333;
+        }
+
+        .pin-cell.power {
+            background: #e74c3c;
+        }
+
+        .pin-cell.ground {
+            background: #34495e;
+        }
+
+        .pin-cell.gpio {
+            background: #27ae60;
+        }
+
+        .pin-cell.used {
+            background: #f39c12;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
+        }
+
+        .warning {
+            background: rgba(231, 76, 60, 0.2);
+            border-left: 3px solid #e74c3c;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .warning strong {
+            color: #e74c3c;
+        }
+
+        .success {
+            background: rgba(80, 200, 120, 0.2);
+            border-left: 3px solid #50c878;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .success strong {
+            color: #50c878;
+        }
+
+        @media (max-width: 768px) {
+            .boards {
+                grid-template-columns: 1fr;
+            }
+            .pin-grid {
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 R2-D2 Wiring Guide</h1>
+        <div class="subtitle">All BTS7960 H-Bridges Configuration</div>
+
+        <div class="success">
+            <strong>✅ Advantage of Using BTS7960 for Dome:</strong>
+            <ul>
+                <li>Higher current capacity (up to 43A)</li>
+                <li>Better heat dissipation</li>
+                <li>Simpler wiring - just 2 PWM pins</li>
+                <li>More reliable than L298N</li>
+            </ul>
+        </div>
+
+        <div class="gpio-note">
+            <strong>📌 GPIO Pin Numbering:</strong> This guide uses BCM (Broadcom) pin numbering, which refers to the GPIO numbers (e.g., GPIO 18), NOT the physical pin numbers on the board.
+        </div>
+
+        <div class="boards">
+            <div class="board">
+                <h2>🚗 LEFT DRIVE MOTOR (BTS7960 #1)</h2>
+                <div class="connection">
+                    <div class="pin">RPWM</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 23 (Pin 16)</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">LPWM</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 18 (Pin 12)</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">R_EN</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">L_EN</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">GND</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GND</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">VCC</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+            </div>
+
+            <div class="board">
+                <h2>🚗 RIGHT DRIVE MOTOR (BTS7960 #2)</h2>
+                <div class="connection">
+                    <div class="pin">RPWM</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 20 (Pin 38)</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">LPWM</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 19 (Pin 35)</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">R_EN</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">L_EN</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">GND</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GND</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">VCC</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+            </div>
+
+            <div class="board dome">
+                <h2>🔵 DOME MOTOR (BTS7960 #3)</h2>
+                <div class="connection">
+                    <div class="pin">RPWM</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 25 (Pin 22)</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">LPWM</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 24 (Pin 18)</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">R_EN</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">L_EN</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">GND</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GND</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">VCC</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ CRITICAL POWER NOTES:</strong>
+            <ul>
+                <li><strong>VCC (5V):</strong> Logic power for the BTS7960 board - connect to Pi's 5V pin</li>
+                <li><strong>Motor Power:</strong> Connect your battery (6-27V) to the <strong>B+ and B-</strong> terminals on each BTS7960</li>
+                <li><strong>Common Ground:</strong> Connect battery GND to Pi GND (essential!)</li>
+                <li><strong>DO NOT</strong> power the motors from Pi's power - only VCC for logic</li>
+            </ul>
+        </div>
+
+        <div class="pinout">
+            <h3>📍 Raspberry Pi 4 GPIO Pinout (Used Pins Highlighted)</h3>
+            <div class="pin-grid">
+                <!-- Row 1 -->
+                <div class="pin-cell power">1: 3.3V</div>
+                <div class="pin-cell power">2: 5V</div>
+
+                <!-- Row 2 -->
+                <div class="pin-cell gpio">3: GPIO 2</div>
+                <div class="pin-cell power">4: 5V</div>
+
+                <!-- Row 3 -->
+                <div class="pin-cell gpio">5: GPIO 3</div>
+                <div class="pin-cell ground">6: GND</div>
+
+                <!-- Row 4 -->
+                <div class="pin-cell gpio">7: GPIO 4</div>
+                <div class="pin-cell gpio">8: GPIO 14</div>
+
+                <!-- Row 5 -->
+                <div class="pin-cell ground">9: GND</div>
+                <div class="pin-cell gpio">10: GPIO 15</div>
+
+                <!-- Row 6 -->
+                <div class="pin-cell gpio">11: GPIO 17</div>
+                <div class="pin-cell gpio used">12: GPIO 18 (L-LPWM)</div>
+
+                <!-- Row 7 -->
+                <div class="pin-cell gpio">13: GPIO 27</div>
+                <div class="pin-cell ground">14: GND</div>
+
+                <!-- Row 8 -->
+                <div class="pin-cell gpio">15: GPIO 22</div>
+                <div class="pin-cell gpio used">16: GPIO 23 (L-RPWM)</div>
+
+                <!-- Row 9 -->
+                <div class="pin-cell power">17: 3.3V</div>
+                <div class="pin-cell gpio used">18: GPIO 24 (Dome LPWM)</div>
+
+                <!-- Row 10 -->
+                <div class="pin-cell gpio">19: GPIO 10</div>
+                <div class="pin-cell ground">20: GND</div>
+
+                <!-- Row 11 -->
+                <div class="pin-cell gpio">21: GPIO 9</div>
+                <div class="pin-cell gpio used">22: GPIO 25 (Dome RPWM)</div>
+
+                <!-- Row 12 -->
+                <div class="pin-cell gpio">23: GPIO 11</div>
+                <div class="pin-cell gpio">24: GPIO 8</div>
+
+                <!-- Row 13 -->
+                <div class="pin-cell ground">25: GND</div>
+                <div class="pin-cell gpio">26: GPIO 7</div>
+
+                <!-- Row 14 -->
+                <div class="pin-cell gpio">27: ID_SD</div>
+                <div class="pin-cell gpio">28: ID_SC</div>
+
+                <!-- Row 15 -->
+                <div class="pin-cell gpio used">29: GPIO 5 (Act A Retract)</div>
+                <div class="pin-cell ground">30: GND</div>
+
+                <!-- Row 16 -->
+                <div class="pin-cell gpio used">31: GPIO 6 (Act A Extend)</div>
+                <div class="pin-cell gpio used">32: GPIO 12 (Screw Down)</div>
+
+                <!-- Row 17 -->
+                <div class="pin-cell gpio used">33: GPIO 13 (Screw Up)</div>
+                <div class="pin-cell ground">34: GND</div>
+
+                <!-- Row 18 -->
+                <div class="pin-cell gpio used">35: GPIO 19 (R-LPWM)</div>
+                <div class="pin-cell gpio used">36: GPIO 16 (Act B Retract)</div>
+
+                <!-- Row 19 -->
+                <div class="pin-cell gpio">37: GPIO 26 (unused - not HAT-safe)</div>
+                <div class="pin-cell gpio used">38: GPIO 20 (R-RPWM)</div>
+
+                <!-- Row 20 -->
+                <div class="pin-cell ground">39: GND</div>
+                <div class="pin-cell gpio used">40: GPIO 21 (Act B Extend)</div>
+            </div>
+        </div>
+
+        <div class="gpio-note">
+            <strong>🔧 Quick Connection Summary:</strong><br><br>
+
+            <strong>BTS7960 Pin Explanations:</strong><br>
+            • <strong>RPWM:</strong> Right PWM (clockwise/forward rotation)<br>
+            • <strong>LPWM:</strong> Left PWM (counter-clockwise/reverse rotation)<br>
+            • <strong>R_EN & L_EN:</strong> Enable pins (tie to 5V for always-on)<br>
+            • <strong>VCC:</strong> Logic power (5V from Pi)<br>
+            • <strong>GND:</strong> Common ground<br>
+            • <strong>B+ / B-:</strong> Motor battery power<br>
+            • <strong>M+ / M-:</strong> Motor output terminals<br><br>
+
+            <strong>All 6 BTS7960 Motor Drivers:</strong><br>
+            • Left Drive Motor → BTS7960 #1 (GPIO 18/23)<br>
+            • Right Drive Motor → BTS7960 #2 (GPIO 19/20)<br>
+            • Dome Motor → BTS7960 #3 (GPIO 24/25)<br>
+            • Leg Actuator A → BTS7960 #4A (GPIO 5/6)<br>
+            • Leg Actuator B → BTS7960 #4B (GPIO 16/21)<br>
+            • Center Foot Lead Screw (24V) → BTS7960 #5 (GPIO 13/12)<br><br>
+
+            <strong>I2C Devices (shared bus):</strong><br>
+            • Adafruit 16-Ch PWM/Servo HAT → address 0x40<br>
+            • OLED IP address display → address 0x3C<br><br>
+
+            <strong>Power Distribution:</strong><br>
+            • Pi 5V (Pin 2 or 4) → VCC on all 6 BTS7960 boards<br>
+            • 12V battery → B+/B- on Left, Right, Dome, and both Actuator BTS7960 boards<br>
+            • SEPARATE 24V supply → B+/B- on the Lead Screw BTS7960 only<br>
+            • All battery negatives (12V and 24V) → common GND with Pi GND<br>
+        </div>
+
+        <div class="boards">
+            <div class="board dome">
+                <h2>🦿 LEG ACTUATOR A (BTS7960 #4A)</h2>
+                <div class="connection">
+                    <div class="pin">RPWM</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 6 (Pin 31) - Extend</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">LPWM</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 5 (Pin 29) - Retract</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">R_EN / L_EN</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">VCC</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">GND</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GND</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">B+ / B-</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">12V Battery</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">M+ / M-</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">Actuator A only</div>
+                </div>
+            </div>
+
+            <div class="board dome">
+                <h2>🦿 LEG ACTUATOR B (BTS7960 #4B)</h2>
+                <div class="connection">
+                    <div class="pin">RPWM</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 21 (Pin 40) - Extend</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">LPWM</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 16 (Pin 36) - Retract</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">R_EN / L_EN</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">VCC</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">GND</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GND</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">B+ / B-</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">12V Battery</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">M+ / M-</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">Actuator B only</div>
+                </div>
+            </div>
+
+            <div class="board dome">
+                <h2>⚓ CENTER FOOT LEAD SCREW (BTS7960 #5, 24V)</h2>
+                <div class="connection">
+                    <div class="pin">RPWM</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 12 (Pin 32) - Down</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">LPWM</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 13 (Pin 33) - Up</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">R_EN / L_EN</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">VCC</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">5V</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">GND</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GND</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">B+ / B-</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">SEPARATE 24V supply</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">M+ / M-</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">24V Lead Screw Motor</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="success">
+            <strong>✅ Why Two Separate Drivers is Safer:</strong>
+            <ul>
+                <li>Each actuator gets its own dedicated BTS7960 - one actuator drawing more current (e.g., binding slightly, aging unevenly) can't rob power from the other</li>
+                <li>If one driver fails, only one leg is affected instead of both</li>
+                <li>They're still kept perfectly in sync because the code sends the "extend"/"retract"/"stop" command to BOTH drivers at the exact same instant</li>
+                <li>You can independently tune speed per actuator later if needed for fine alignment</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ ACTUATOR WIRING NOTE (MIRRORED PAIR):</strong>
+            <ul>
+                <li>Because they're mounted as mirror images, one actuator may need its two motor leads REVERSED compared to the other so that both physically extend at the same time when commanded together</li>
+                <li>Test this first at low duty cycle - if one leg moves opposite the other, swap that actuator's M+ and M- wires at the BTS7960</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ ACTUATOR TIMING NOTE:</strong>
+            <ul>
+                <li>The code drives both actuators for a fixed time (measured full-stroke time + a safety overshoot), then stops them both automatically</li>
+                <li>Each actuator's built-in limit switch will safely stop it at the true end of travel even if that happens before the timer does</li>
+                <li>Measure your actual full-stroke time and update <code>ACTUATOR_STROKE_TIME</code> in the code to match</li>
+            </ul>
+        </div>
+
+        <div class="boards">
+            <div class="board">
+                <h2>🎛️ ADAFRUIT 16-CH PWM/SERVO HAT</h2>
+                <div class="connection">
+                    <div class="pin">SDA</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 2 (Pin 3)</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">SCL</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 3 (Pin 5)</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">VCC (logic)</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">3.3V or 5V (from header)</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">GND</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GND</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">V+ (servo power)</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">Separate 5-6V servo supply</div>
+                </div>
+            </div>
+
+            <div class="board">
+                <h2>📺 OLED DISPLAY (Pi IP Address)</h2>
+                <div class="connection">
+                    <div class="pin">SDA</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 2 (Pin 3) - shared bus</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">SCL</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GPIO 3 (Pin 5) - shared bus</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">VCC</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">3.3V</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">GND</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">GND</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gpio-note">
+            <strong>🎛️ HAT-Safe GPIO Pins:</strong><br><br>
+            With the Adafruit 16-Channel PWM/Servo HAT stacked on the header, only these GPIO pins
+            are available for other use: <strong>4, 5, 6, 12, 13, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27</strong>.<br><br>
+            Every motor pin in this build (18, 19, 20, 23, 24, 25, 5, 6, 16, 21, 13, 12) is chosen from
+            this list. GPIO 26 is NOT usable with this HAT, which is why the lead screw's "Down" signal
+            was moved to GPIO 12.
+        </div>
+
+        <div class="gpio-note">
+            <strong>🎛️ I2C Bus Sharing:</strong><br><br>
+            The PWM/Servo HAT (default address 0x40) and the OLED display (default address 0x3C)
+            live on the SAME I2C bus (GPIO 2/SDA and GPIO 3/SCL) at DIFFERENT addresses, so they
+            can coexist without conflict.<br><br>
+            If the Servo HAT is physically stacked directly on the Pi's 40-pin header, use a
+            <strong>stacking/pass-through header</strong> so the other GPIO pins used for the motors
+            (18, 19, 20, 23, 24, 25, 5, 6, 13, 26) remain accessible for your jumper wires.
+        </div>
+
+        <div class="success">
+            <strong>✅ Testing Your Setup:</strong><br><br>
+            After wiring, run: <code>sudo python3 app.py</code><br><br>
+            Then test in this order:<br>
+            1. Press W (forward) - both drive motors should spin<br>
+            2. Press S (backward) - both drive motors reverse<br>
+            3. Press Q - dome should rotate left<br>
+            4. Press E - dome should rotate right<br>
+            5. Click "Extend (2→3)" - both leg actuators run together (independent drivers), then auto-stop<br>
+            6. Click "Retract (3→2)" - both leg actuators reverse together, then auto-stop<br>
+            7. Hold R - center foot lead screw raises<br>
+            8. Hold F - center foot lead screw lowers<br>
+            9. OLED screen should show "R2-D2 ONLINE" and the Pi's IP address<br><br>
+            If any motor spins backwards, swap its M+ and M- wires!
+        </div>
+
+        <div class="boards">
+            <div class="board dome">
+                <h2>🔊 USB SPEAKER (AUDIO)</h2>
+                <div class="connection">
+                    <div class="pin">USB Speaker</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">Pi USB Port</div>
+                </div>
+                <div class="connection">
+                    <div class="pin">Detected As</div>
+                    <div class="arrow">→</div>
+                    <div class="pin">card 3 (hw:3,0)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gpio-note">
+            <strong>🔊 Audio Notes:</strong><br><br>
+            • Plug the USB speaker directly into any USB port on the Pi<br>
+            • No GPIO pins are used for audio - it's all handled over USB<br>
+            • Confirm the card number with <code>aplay -l</code> (yours is card 3)<br>
+            • The app uses <code>mpg123 -a hw:3,0</code> to play sounds and <code>amixer -c 3</code> to control volume<br>
+            • Volume can be adjusted live from the web interface slider
+        </div>
+    </div>
+</body>
+</html>
